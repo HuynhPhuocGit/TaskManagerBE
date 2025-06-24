@@ -2,6 +2,7 @@ package com.task.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,17 +30,20 @@ public class UserService {
 		return userRepository.findAll();
 	}
 
-	public Optional<User> findById(Long id) {
-		return userRepository.findById(id);
-	}
+
 
 	public void delete(User entity) {
 		userRepository.delete(entity);
 	}
 
-	public void deleteById(Long id) {
+	public Optional<User> findById(UUID id) {
+		return userRepository.findById(id);
+	}
+
+	public void deleteById(UUID id) {
 		userRepository.deleteById(id);
 	}
+
 	
 	
 }

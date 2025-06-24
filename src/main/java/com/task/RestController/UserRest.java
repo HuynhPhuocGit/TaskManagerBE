@@ -2,6 +2,7 @@ package com.task.RestController;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,11 +18,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.task.DTO.UserCreateDTO;
+import com.task.DTO.UserResponseDTO;
+import com.task.DTO.UserUpdateDTO;
 import com.task.model.User;
 import com.task.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -30,51 +35,73 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Tag(name = "User Controller", description = "Quản lý người dùng")
 public class UserRest {
+
 	private final UserService userService;
 
 	@Operation(summary = "Lấy danh sách người dùng")
 	@GetMapping
-	public List<User> getAllUser() {
-		return userService.findAll();
+	public ResponseEntity<List<UserResponseDTO>> getAllUser() {
+		List<User> users = userService.findAll();
+		List<UserResponseDTO> result = users.stream().map(this::mapToResponseDTO).toList();
+		return ResponseEntity.ok(result);
 	}
 
 	@Operation(summary = "Lấy user theo id")
 	@GetMapping("/{id}")
-	public ResponseEntity<User> getUserById(@PathVariable Long id) {
-		return userService.findById(id).map(user -> ResponseEntity.ok(user)) // status 200 OK
-				.orElseGet(() -> ResponseEntity.notFound().build()); // status 404
-	}
-
-	@Operation(summary = "Tạo người dùng")
-	@PostMapping
-	public ResponseEntity<User> createUser(@RequestBody User user) {
-		User createdUser = userService.save(user);
-		return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+	public ResponseEntity<UserResponseDTO> getUserById(@PathVariable UUID id) {
+		return userService.findById(id)
+				.map(user -> ResponseEntity.ok(mapToResponseDTO(user)))
+				.orElse(ResponseEntity.notFound().build());
 	}
 
 	@Operation(summary = "Xóa người dùng")
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+	public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
 		userService.deleteById(id);
-		return ResponseEntity.noContent().build(); // HTTP 204 No Content
+		return ResponseEntity.noContent().build();
+	}
+
+	@Operation(summary = "Tạo người dùng")
+	@PostMapping
+	public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserCreateDTO dto) {
+		User user = mapToEntity(dto);
+		User saved = userService.save(user);
+		return ResponseEntity.status(HttpStatus.CREATED).body(mapToResponseDTO(saved));
 	}
 
 	@Operation(summary = "Cập nhật người dùng")
 	@PutMapping("/{id}")
-	public ResponseEntity<User> editUser(@PathVariable Long id, @RequestBody User user) {
+	public ResponseEntity<UserResponseDTO> editUser(@PathVariable UUID id, @Valid @RequestBody UserUpdateDTO dto) {
 		Optional<User> optionalUser = userService.findById(id);
 		if (optionalUser.isEmpty()) {
-			return ResponseEntity.notFound().build(); // 404 nếu không tồn tại
+			return ResponseEntity.notFound().build();
 		}
-		User existingUser = optionalUser.get();
-		existingUser.setUsername(user.getUsername());
-		existingUser.setEmail(user.getEmail());
-		existingUser.setPassword(user.getPassword());
-		existingUser.setRole(user.getRole());
-
-		User savedUser = userService.save(existingUser);
-
-		return ResponseEntity.ok(savedUser); // Trả về user đã được cập nhật
+		User user = optionalUser.get();
+		user.setUsername(dto.getUsername());
+		user.setEmail(dto.getEmail());
+		user.setRole(dto.getRole());
+		User updated = userService.save(user);
+		return ResponseEntity.ok(mapToResponseDTO(updated));
 	}
 
+
+	// ---------- Mapping methods ----------
+	private User mapToEntity(UserCreateDTO dto) {
+		User user = new User();
+		user.setUsername(dto.getUsername());
+		user.setEmail(dto.getEmail());
+		user.setPassword(dto.getPassword());
+		user.setRole(dto.getRole());
+		return user;
+	}
+
+	private UserResponseDTO mapToResponseDTO(User user) {
+		UserResponseDTO dto = new UserResponseDTO();
+		dto.setId(user.getId());
+		dto.setUsername(user.getUsername());
+		dto.setEmail(user.getEmail());
+		dto.setRole(user.getRole());
+		return dto;
+	}
 }
+
