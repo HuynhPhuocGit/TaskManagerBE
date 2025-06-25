@@ -39,6 +39,5 @@ public class TaskList {
 	@ManyToOne
 	private Boards board;
 
-	@ManyToOne
-	private User assignee;
+	
 }
