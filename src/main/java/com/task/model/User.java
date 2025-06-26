@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class User {
 	@Id
-	@UuidGenerator
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id", nullable = false, updatable = false)
 	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private UUID id;
