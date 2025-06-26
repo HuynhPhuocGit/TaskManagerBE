@@ -19,20 +19,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users") // đổi từ "users"
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class User {
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "id", nullable = false, updatable = false)
-	@JdbcTypeCode(SqlTypes.VARCHAR)
-	private UUID id;
+    @Id
+    @UuidGenerator
+    @Column(name = "id", nullable = false, updatable = false, length = 36)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    private UUID id;
 
-	private String username;
-	private String email;
-	private String password;
-	private String role;
+    private String username;
+    private String email;
+    private String password;
+    private String role;
 }
+

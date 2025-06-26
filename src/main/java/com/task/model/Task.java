@@ -28,9 +28,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Task {
 	@Id
-    @UuidGenerator
-    @Column(name = "id", nullable = false, updatable = false)
-    @JdbcTypeCode(SqlTypes.VARCHAR)
+	@UuidGenerator
+	@Column(name = "id", nullable = false, updatable = false, length = 36)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private UUID id;
 
 	private String title;
@@ -38,7 +38,9 @@ public class Task {
 	private Timestamp dealine;
 
 	@ManyToOne
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private TaskList tasklist;
 	@ManyToOne
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private User assignee;
 }

@@ -27,9 +27,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class TaskList {
 	@Id
-    @UuidGenerator
-    @Column(name = "id", nullable = false, updatable = false)
-    @JdbcTypeCode(SqlTypes.VARCHAR)
+	@UuidGenerator
+	@Column(name = "id", nullable = false, updatable = false, length = 36)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private UUID id;
 
 	private String name;
@@ -37,7 +37,7 @@ public class TaskList {
 	private String position;
 
 	@ManyToOne
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private Boards board;
 
-	
 }

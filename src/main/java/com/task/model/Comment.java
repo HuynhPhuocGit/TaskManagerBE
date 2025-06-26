@@ -22,21 +22,24 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "comments")
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Comment {
 	@Id
-    @UuidGenerator
-    @Column(name = "id", nullable = false, updatable = false)
-    @JdbcTypeCode(SqlTypes.VARCHAR)
+	@UuidGenerator
+	@Column(name = "id", nullable = false, updatable = false, length = 36)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private UUID id;
 
-    private String content;
-    private Timestamp creatAt;
-    @ManyToOne
-    private User author;
+	private String content;
+	private Timestamp creatAt;
+	@ManyToOne
+	@JdbcTypeCode(SqlTypes.VARCHAR)
+	private User author;
 
-    @ManyToOne
-    private Task task;
+	@ManyToOne
+	@JdbcTypeCode(SqlTypes.VARCHAR)
+	private Task task;
 }
-
-

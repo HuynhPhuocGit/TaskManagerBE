@@ -26,14 +26,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class Boards {
-	@Id
-    @UuidGenerator
-    @Column(name = "id", nullable = false, updatable = false)
-    @JdbcTypeCode(SqlTypes.VARCHAR)
+	 @Id
+	    @UuidGenerator
+	    @Column(name = "id", nullable = false, updatable = false, length = 36)
+	    @JdbcTypeCode(SqlTypes.VARCHAR)
 	private UUID id;
     	
 	private String name;
 
 	@ManyToOne
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private User owner;
 }
