@@ -53,6 +53,7 @@ public class UserRest {
 				.map(user -> ResponseEntity.ok(mapToResponseDTO(user)))
 				.orElse(ResponseEntity.notFound().build());
 	}
+	
 
 	@Operation(summary = "Xóa người dùng")
 	@DeleteMapping("/{id}")
