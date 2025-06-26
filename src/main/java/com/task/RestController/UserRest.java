@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,7 +36,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Tag(name = "User Controller", description = "Quản lý người dùng")
 public class UserRest {
-
+    private final PasswordEncoder passwordEncoder;
 	private final UserService userService;
 
 	@Operation(summary = "Lấy danh sách người dùng")
@@ -66,6 +67,7 @@ public class UserRest {
 	@PostMapping
 	public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserCreateDTO dto) {
 		User user = mapToEntity(dto);
+		user.setPassword(passwordEncoder.encode(dto.getPassword()));
 		User saved = userService.save(user);
 		return ResponseEntity.status(HttpStatus.CREATED).body(mapToResponseDTO(saved));
 	}
