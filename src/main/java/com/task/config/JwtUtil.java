@@ -1,11 +1,15 @@
 package com.task.config;
 
-import com.task.model.User;
+
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
+import com.task.model.User;
+
+import javax.crypto.SecretKey;
 import java.util.Date;
 
 @Component
@@ -17,30 +21,36 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private long EXPIRATION_MS;
 
-    
+    private SecretKey getSigningKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
     public String generateToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getUsername())
-                .claim("role", user.getRole()) // thêm role vào payload
+                .claim("role", user.getRole())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_MS))
-                .signWith(SignatureAlgorithm.HS512, SECRET_KEY.getBytes(StandardCharsets.UTF_8))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
                 .compact();
     }
 
-    // Trích xuất username từ token
     public String extractUsername(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY.getBytes(StandardCharsets.UTF_8))
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
     }
 
-    // Kiểm tra token có hợp lệ hay không
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(SECRET_KEY.getBytes(StandardCharsets.UTF_8)).parseClaimsJws(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
             System.out.println("Token đã hết hạn");
@@ -48,7 +58,7 @@ public class JwtUtil {
             System.out.println("Token không được hỗ trợ");
         } catch (MalformedJwtException e) {
             System.out.println("Token sai định dạng");
-        } catch (SignatureException e) {
+        } catch (SecurityException e) {
             System.out.println("Chữ ký token không hợp lệ");
         } catch (IllegalArgumentException e) {
             System.out.println("Token rỗng");
